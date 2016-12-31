@@ -1,0 +1,20 @@
+{
+  "name": "alexa-howemo-skill",
+  "version": "1.0.0",
+  "description": "An example Alexa Skill using Eyeris EmoVu face analytics.  Ask it \"Alexa howme?\".  Be sure to review the README on setup.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "alexa",
+    "computervision",
+    "machinelearning",
+    "emovu"
+  ],
+  "author": "truedat101",
+  "license": "MIT",
+  "dependencies": {
+    "alexa-sdk": "^1.0.6"
+  }
+}
