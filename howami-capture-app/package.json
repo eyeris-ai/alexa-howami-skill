@@ -1,7 +1,7 @@
 {
-  "name": "alexa-howami-skill",
+  "name": "howami-capture-app",
   "version": "1.0.0",
-  "description": "An example Alexa Skill using Eyeris EmoVu face analytics.  Ask it \"Alexa, How Am I?\".  Be sure to review the README on setup.",
+  "description": "A sample of using EmoVu Web API with the How Am I Skill.  Be sure to review the README on setup.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
