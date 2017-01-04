@@ -6,6 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": {
+    "node": ">=0.10.0"
+  },
   "keywords": [
     "alexa",
     "computervision",
@@ -15,6 +18,8 @@
   "author": "truedat101",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "alexa-sdk": "^1.0.6"
+    "alexa-sdk": "^1.0.6",
+    "pngjs": "^0.4.0",
+    "v4l2camera": "^0.4.3"
   }
 }
