@@ -7,6 +7,7 @@
 	"region": "us-east-1",
 	"S3bucketID": "CONFIGURE A BUCKET CALLED howami",
 	"S3key": "emovuresult.json",
+	"S3expires": 60,
 	"camerawidth": 176,
 	"cameraheight": 120,
 	"cameradeviceid": "/dev/video0"

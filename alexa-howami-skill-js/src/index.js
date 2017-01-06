@@ -100,7 +100,7 @@ HowAmISkill.prototype.eventHandlers.onSessionStarted = function (sessionStartedR
 
 HowAmISkill.prototype.eventHandlers.onLaunch = function (launchRequest, session, response) {
     console.log("HowAmISkill onLaunch requestId: " + launchRequest.requestId + ", sessionId: " + session.sessionId);
-    var speechOutput = "Welcome to the Eyeris EmoVu How Am I Skill, you can say How Am I";
+    var speechOutput = "Welcome to the How Am I Skill.  Hold your expression and say How am I";
     var repromptText = "You can say How Am I";
     response.ask(speechOutput, repromptText);
 };
@@ -277,11 +277,11 @@ HowAmISkill.prototype.intentHandlers = {
                             }
                             */
                             if (rankedEmotionScores[0][0] === "Anger") {
-                                saytext = "Woah, you mad bro?  Don't be so Angry. " + jsonData.Timestamp; // + ", top score is ", topscorevalue;
+                                saytext = "Woah, you mad bro?  Don't be so Angry."; // + jsonData.Timestamp + ", top score is ", topscorevalue;
                             } else if (rankedEmotionScores[0][0] === "Disgust") {
-                                saytext = "Hmmm, do you smell something bad?  You can't hide your disgust.";
+                                saytext = "Hmmm, do you smell something bad?  Check your shoes.   Ew, disgusting.";
                             }  else if (rankedEmotionScores[0][0] === "Fear") {
-                                saytext = "What are you afraid of?  I see scared people.";
+                                saytext = "What are you afraid of?  You look scared.";
                             } else if (rankedEmotionScores[0][0] === "Joy") {
                                 saytext = "Now that's a smile worth a million bucks.  Your joy is contagious.";
                             }  else if (rankedEmotionScores[0][0] === "Neutral") {

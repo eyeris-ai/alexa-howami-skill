@@ -160,7 +160,8 @@ var toPng = function () {
     });
     */
     // if (frameno === 5 || frameno === 10 || frameno === 15 || frameno === 20 || frameno === 25 || frameno === 30) {
-    if (frameno === 10 || frameno === 20 || frameno === 30) {
+    // if (frameno === 10 || frameno === 20 || frameno === 30) {
+    if (frameno === 6 || frameno === 12 || frameno === 18 || frameno === 24 || frameno === 30) {
         analyzeFaceFrame(frameno-1, lastFrameResult, function(data){
             console.log("analyzeFaceFrame done");
             if (data) {
