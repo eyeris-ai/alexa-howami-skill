@@ -226,7 +226,7 @@ HowAmISkill.prototype.intentHandlers = {
                             // Grab the emotion values
                             //
                             // XXX We should be a bit more careful and verify the properties exist
-                            var emotionResult = jsonData.FaceAnalysisResults[0];
+                            var emotionResult = jsonData.FaceAnalysisResults[0].EmotionResult;
 
                             var topscorevalue = 0;
                             var rankedEmotionScores = [];
@@ -240,7 +240,6 @@ HowAmISkill.prototype.intentHandlers = {
                                             //
                                             // Push to front and set the topscorevalue
                                             //
-                                            // rankedEmotionScores.unshift([EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
                                             rankedEmotionScores.splice(j,0, [EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
                                             // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
                                             if (emotionResult[EMOTION_SET[i]] > topscorevalue) {
@@ -271,8 +270,14 @@ HowAmISkill.prototype.intentHandlers = {
 
                         // console.log(rankedEmotionScores);
                         // console.log("topscorevalue = ", topscorevalue);
+                            /*
+                            var scores = "";
+                            for (var k = 0; k < rankedEmotionScores.length; k++) {
+                                scores += rankedEmotionScores[k][1] + " ";
+                            }
+                            */
                             if (rankedEmotionScores[0][0] === "Anger") {
-                                saytext = "Woah, you mad bro?  Don't be so Angry.";
+                                saytext = "Woah, you mad bro?  Don't be so Angry. " + jsonData.Timestamp; // + ", top score is ", topscorevalue;
                             } else if (rankedEmotionScores[0][0] === "Disgust") {
                                 saytext = "Hmmm, do you smell something bad?  You can't hide your disgust.";
                             }  else if (rankedEmotionScores[0][0] === "Fear") {
@@ -285,10 +290,10 @@ HowAmISkill.prototype.intentHandlers = {
                                 saytext = "Are you feeling ok?  You seem sad.  Too much CES?";
                             }  else if (rankedEmotionScores[0][0] === "Surprise") {
                                 saytext = "You look shocked.  Did we just surprise you with an awesome demo?";
+                            } else {
+                                saytext = "Hmmmm, you are experiencing an emotion I cannot describe.";
                             }
                             // console.log("About to say: ", saytext);
-                            
-
                         } else {
                             //
                             // Form an Error

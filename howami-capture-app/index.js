@@ -202,7 +202,7 @@ var sendEmoVuResultsToS3 = function(jsonresults) {
     var s3 = new AWS.S3();
     var databuff = new Buffer(JSON.stringify(jsonresults), "utf-8");
 
-    s3.putObject({ Bucket: config.S3bucketID, Key: config.S3key, Body: databuff}, function(err, data) {
+    s3.putObject({ Bucket: config.S3bucketID, Key: config.S3key, Body: databuff, Expires: 1}, function(err, data) {
         if (err) {
           console.error("Error, " + err);
         }
