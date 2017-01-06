@@ -21,6 +21,7 @@
     "alexa-sdk": "^1.0.6",
     "form-data": "^1.0.0",
     "pngjs": "^0.4.0",
+    "request": "^2.76.0",
     "v4l2camera": "^0.4.3"
   }
 }
