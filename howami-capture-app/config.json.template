@@ -1,5 +1,10 @@
 {
 	"name": "How Am I Capture App Config",
 	"version": "1.0",
-	"emovu_api_key": "INSERT API KEY HERE"
+	"emovu_api_key": "INSERT API KEY HERE",
+	"accessKeyID": "INSERT YOUR AWS SDK ACCESS KEY ID",
+	"secretAccessKey": "INSERT YOUR AWS SDK SECRET ACCESS KEY",
+	"region": "us-east-1",
+	"S3bucketID": "CONFIGURE A BUCKET CALLED howami",
+	"S3key": "emovuresult.json"
 }

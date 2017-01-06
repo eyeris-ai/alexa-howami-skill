@@ -167,6 +167,7 @@ var toPng = function () {
                 console.log("Inspecting data");
                 if (data.Tracked && data.Tracked === true) {
                     console.log("Face Analytics Data Tracked, dialing up S3 to save results");
+                    sendEmoVuResultsToS3(data);
                 } else {
                     console.log("No Face Analytics Data Tracked");
                 }
@@ -181,6 +182,38 @@ var toPng = function () {
     }
     return png;
 };
+
+var initAWS = function() {
+    var officialClientCfg = {
+      accessKeyId: config.accessKeyID, 
+      secretAccessKey: config.secretAccessKey,
+      region: config.region // 'us-east-1' US East (N. Virginia)
+                            // http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+                            // http://docs.aws.amazon.com/general/latest/gr/rande.html#lambda_region
+                            // Be sure you send S3 to the same region as your Lambda Functions
+    };
+    AWS.config.update(officialClientCfg);
+
+};
+
+var sendEmoVuResultsToS3 = function(jsonresults) {
+    console.log("sendEmoVuResultsToS3");
+    var starttime = now();
+    var s3 = new AWS.S3();
+    var databuff = new Buffer(JSON.stringify(jsonresults), "utf-8");
+
+    s3.putObject({ Bucket: config.S3bucketID, Key: config.S3key, Body: databuff}, function(err, data) {
+        if (err) {
+          console.error("Error, " + err);
+        }
+        
+        currenttime = now();
+        console.log("-----------------------------------------------------------");
+        console.log("Completed S3 upload in " + (currenttime-starttime) + "ms");
+        console.log("-----------------------------------------------------------");
+    });
+}
+
 
 var analyzeFaceFrame = function(pngframeno, lastFrameResult, callback) {
 	console.log("analyzeFaceFrame");
@@ -249,6 +282,7 @@ var analyzeFaceFrame = function(pngframeno, lastFrameResult, callback) {
 
 };
 
+initAWS();
 var cam = new v4l2camera.Camera("/dev/video0");  // XXX Hardcoded values
 cam.configSet({width: 176, height: 120}); // XXX Harcoded values
 cam.start();
