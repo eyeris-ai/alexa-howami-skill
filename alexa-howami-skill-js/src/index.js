@@ -62,7 +62,15 @@ var runid = Date();
 // You might need to invoke another lambda directly
 // Be mindful of your resource limits
 // var lambda = new AWS.Lambda();
-
+var EMOTION_SET = [
+    "Anger",
+    "Disgust",
+    "Fear",
+    "Joy",
+    "Neutral",
+    "Sadness",
+    "Surprise"
+];
 
 /**
  * The AlexaSkill prototype and helper functions
@@ -127,6 +135,7 @@ HowAmISkill.prototype.intentHandlers = {
             "Bucket": config.S3bucketID,
             "Key": config.S3key
         }
+
         s3.getObject(params, function(err, data) {
             //
             // Parse the EmoVu result
@@ -144,18 +153,18 @@ HowAmISkill.prototype.intentHandlers = {
             //
             // Say
             //
-            var saytext = "You are doing great";
+            var saytext = "You are doing great.";
 
             //
             // Card Heading
             //
-            var cardheading = "How Am I?  I'll Tell you";
+            var cardheading = "How Am I?  I'll Tell you.";
 
             //
             // Card Text
             // Potentially we might want to say a lot more in a card
             // Otherwise, just copy the say text.
-            var additionaltext = ".  I see you.  Don't ever change";
+            var additionaltext = ".  I see you.  Don't ever change.";
 
             if (err) {
                 console.log(err, err.stack); // an error occurred
@@ -172,6 +181,125 @@ HowAmISkill.prototype.intentHandlers = {
                         var jsonData = JSON.parse(data.Body.toString('utf-8'));
                         //
                         // Form an Valid response
+                        //
+                        // Format:
+                        //  - Tracked - should be true
+                        //
+                        // Some additional useful stuff
+                        // See more details about results here: http://emovu.com/docs/html/web_api.htm
+                        //
+                        /*
+                        "FaceAnalysisResults": [{
+                            "AgeGroupResult": {
+                                "AgeGroup": "Adult",
+                                "Computed": true,
+                                "Confidence": 0.984
+                            },
+                            "EmotionResult": {
+                                "Anger": 0.002,
+                                "Computed": true,
+                                "Disgust": 0.01,
+                                "Fear": 0.0,
+                                "Joy": 0.0,
+                                "Neutral": 0.986,
+                                "Sadness": 0.002,
+                                "Surprise": 0.0
+                            },
+                            "GenderResult": {
+                                "Computed": true,
+                                "Confidence": 1.0,
+                                "Gender": "Male"
+                            }
+                        }]
+                        */
+
+                        //
+                        // Homework assignment, build a more sophisticated and varied set of responses
+                        // Maybe create a magic 8 ball style set of answers
+                        // Or maybe do some more sophisticated analysis.  Were eyes closed?
+                        // Can you address the person by Gender?
+                        // Can you guess at the age range?
+                        // How about give us some sentiment
+                        //
+                        if (jsonData.Tracked) {
+                            //
+                            // Grab the emotion values
+                            //
+                            // XXX We should be a bit more careful and verify the properties exist
+                            var emotionResult = jsonData.FaceAnalysisResults[0];
+
+                            var topscorevalue = 0;
+                            var rankedEmotionScores = [];
+
+                            for (var i = 0; i < EMOTION_SET.length; i++) {
+                                // console.log("Checking emotion ", EMOTION_SET[i]);
+                                if (rankedEmotionScores.length > 0) {
+                                    for (var j = 0; j < rankedEmotionScores.length; j++) {
+                                        // console.log("Checking value ", emotionResult[EMOTION_SET[i]], " against ranked score: ", rankedEmotionScores[j]);
+                                        if (emotionResult[EMOTION_SET[i]] > rankedEmotionScores[j][1]) {
+                                            //
+                                            // Push to front and set the topscorevalue
+                                            //
+                                            // rankedEmotionScores.unshift([EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
+                                            rankedEmotionScores.splice(j,0, [EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
+                                            // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
+                                            if (emotionResult[EMOTION_SET[i]] > topscorevalue) {
+                                                // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
+                                                topscorevalue = emotionResult[EMOTION_SET[i]];
+                                            }
+                                            break;
+                                        } else {
+                                            if (j == (rankedEmotionScores.length-1)) {
+                                                rankedEmotionScores.push([EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
+                                                if (emotionResult[EMOTION_SET[i]] > topscorevalue) {
+                                                    // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
+                                                    topscorevalue = emotionResult[EMOTION_SET[i]];
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    rankedEmotionScores.push([EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
+                                    // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
+                                    if (emotionResult[EMOTION_SET[i]] > topscorevalue) {
+                                        // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
+                                        topscorevalue = emotionResult[EMOTION_SET[i]];
+                                    }
+                                }
+                            }
+
+                        // console.log(rankedEmotionScores);
+                        // console.log("topscorevalue = ", topscorevalue);
+                            if (rankedEmotionScores[0][0] === "Anger") {
+                                saytext = "Woah, you mad bro?  Don't be so Angry.";
+                            } else if (rankedEmotionScores[0][0] === "Disgust") {
+                                saytext = "Hmmm, do you smell something bad?  You can't hide your disgust.";
+                            }  else if (rankedEmotionScores[0][0] === "Fear") {
+                                saytext = "What are you afraid of?  I see scared people.";
+                            } else if (rankedEmotionScores[0][0] === "Joy") {
+                                saytext = "Now that's a smile worth a million bucks.  Your joy is contagious.";
+                            }  else if (rankedEmotionScores[0][0] === "Neutral") {
+                                saytext = "Do you always hide your feelings?  You are expressionless.";
+                            }  else if (rankedEmotionScores[0][0] === "Sadness") {
+                                saytext = "Are you feeling ok?  You seem sad.  Too much CES?";
+                            }  else if (rankedEmotionScores[0][0] === "Surprise") {
+                                saytext = "You look shocked.  Did we just surprise you with an awesome demo?";
+                            }
+                            // console.log("About to say: ", saytext);
+                            
+
+                        } else {
+                            //
+                            // Form an Error
+                            //
+                            saytext = "That's strange, but we weren't able to detect any faces.  Are you there?  Try again.";
+                            cardheading = "How Am I?  I can't see you."
+                            additionaltext = ".  Some things to try: Make sure your camera is on, make sure you are sitting in front of your camera, hold still!";
+                        }
+
+                        
+
                         //
                         /*
                         saytext = "Hmmmm I had a problem loading results.  You have bad data.  Bad.";
