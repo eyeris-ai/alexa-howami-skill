@@ -7,7 +7,7 @@ var querystring = require('querystring');
 
 var v4l2camera = require("v4l2camera");
 var pngjs = require("pngjs");
-var FormData = require('form-data');
+// var FormData = require('form-data');
 var request = require('request');
 
 var config = require("./config.json");
@@ -18,6 +18,7 @@ var MAX_FRAMES = 30;
 var frameno = 0;
 var lastFrameResult = undefined;
 var starttimeinms = 0;
+var lasttimestamp = 0;
 
 var server = http.createServer(function (req, res) {
     //console.log(req.url);
@@ -61,6 +62,7 @@ var server = http.createServer(function (req, res) {
 });
 server.listen(3000);
 
+// XXX Fix this up ... we should be able to load the previous images easily without the clipping
 var pngLoaderScript = function () {
     window.addEventListener("load", function (ev) {
         var cam = document.getElementById("cam");
@@ -149,9 +151,14 @@ var toPng = function () {
     // if (frameno === 5 || frameno === 10 || frameno === 15 || frameno === 20 || frameno === 25 || frameno === 30) {
     if (frameno === 10 || frameno === 20 || frameno === 30) {
     analyzeFaceFrame(frameno-1, lastFrameResult, function(data){
+        console.log("analyzeFaceFrame done");
         if (data) {
-            lastFrameResult = data;
-            console.log("Received result: ", data);
+            console.log("Inspecting data");
+            if (data.Tracked && data.Tracked === true) {
+                console.log("Face Analytics Data Tracked, dialing up S3 to save results");
+            } else {
+                console.log("No Face Analytics Data Tracked");
+            }
         }
     });
     }
@@ -169,6 +176,7 @@ var analyzeFaceFrame = function(pngframeno, lastFrameResult, callback) {
 	var result = undefined;
 
 	var timestamp;
+
 	if (starttimeinms === 0) {
 		starttimeinms = Date.now();
 		timestamp = 0;
@@ -184,13 +192,16 @@ var analyzeFaceFrame = function(pngframeno, lastFrameResult, callback) {
 		timestamp
 
 		Further tuning params:
-		XXX TODO
+		XXX TODO - For your homework
+        We really don't want to compute all analytics, and tuning this will improve response time
 	*/
 	if (!lastFrameResult) {
 		lastFrameResult = "";
 	}
 
-    console.log("Read stream for: " + __dirname + '/' + PNGOUT + "-" + pngframeno + ".png");
+
+    console.log("Read stream for: " + PNGOUT + "-" + pngframeno + ".png, previous timestamp at: " + lasttimestamp);
+    // console.log("Using lastFrameResult : " + lastFrameResult);
 	var formData = {
 	  // Pass a simple key-value pair
 	  timestamp: timestamp,
@@ -198,6 +209,7 @@ var analyzeFaceFrame = function(pngframeno, lastFrameResult, callback) {
 	  imageFile: fs.createReadStream(__dirname + '/' + PNGOUT + "-" + pngframeno + ".png")
       // imageFile: fs.createReadStream(__dirname + '/capture-99.png')
 	};
+    lasttimestamp = timestamp;
 	// console.log("Calling emovu with formdata ", formData);
 	request.post({
 		url: EMOVU_WEB_API_BASE_URL,
@@ -206,17 +218,28 @@ var analyzeFaceFrame = function(pngframeno, lastFrameResult, callback) {
 			'LicenseKey': config.emovu_api_key
 		}
 	}, function optionalCallback(err, httpResponse, body) {
-	  if (err) {
-	    return console.error('upload failed:', err);
-	  }
-	  console.log('Post successful for frame#: " + pngframeno + " Server responded with:', body);
-      console.log(httpResponse.statusCode);
+        if (err) {
+            // NOTE, this is likely a network transport or configuration error
+    	    console.error('upload failed:', err);
+    	} else {
+        	console.log('Post successful for frame#: ' + pngframeno + ' Server responded with:', body);
+            console.log(httpResponse.statusCode);
+            // Only save a result if we got a successful reply
+            // I *think* we can assume the API only returns valid JSON, though we should check the
+            // response.getHeader('Content-Type');
+            if (httpResponse.statusCode == 200) {
+                // XXX Don't do too much work here or we get a weird delayed-stream error
+                lastFrameResult = JSON.parse(body);
+                callback(lastFrameResult);
+                // callback(JSON.parse(body));
+            }
+        }
 	});
 
 };
 
 var cam = new v4l2camera.Camera("/dev/video0");  // XXX Hardcoded values
-cam.configSet({width: 352, height: 288}); // XXX Harcoded values
+cam.configSet({width: 176, height: 120}); // XXX Harcoded values
 cam.start();
 cam.capture(function loop() {
 	toPng();
