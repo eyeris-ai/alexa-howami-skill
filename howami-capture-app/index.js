@@ -129,6 +129,12 @@ var toPng = function () {
     // Call EmoVu API on every frame
     console.log("Writing " + PNGOUT + "-" + frameno + ".png");
 
+    //
+    // If we open too many simultaneous connections, we either overwhelm our local
+    // connection, or eventually DDOS the web server
+    //
+    // For right now, we don't need a realtime stream, getting 3-5 fps is fine
+    //
     /*
     if (frameno > 5) {
     analyzeFaceFrame(frameno-5, lastFrameResult, function(data){
@@ -150,17 +156,17 @@ var toPng = function () {
     */
     // if (frameno === 5 || frameno === 10 || frameno === 15 || frameno === 20 || frameno === 25 || frameno === 30) {
     if (frameno === 10 || frameno === 20 || frameno === 30) {
-    analyzeFaceFrame(frameno-1, lastFrameResult, function(data){
-        console.log("analyzeFaceFrame done");
-        if (data) {
-            console.log("Inspecting data");
-            if (data.Tracked && data.Tracked === true) {
-                console.log("Face Analytics Data Tracked, dialing up S3 to save results");
-            } else {
-                console.log("No Face Analytics Data Tracked");
+        analyzeFaceFrame(frameno-1, lastFrameResult, function(data){
+            console.log("analyzeFaceFrame done");
+            if (data) {
+                console.log("Inspecting data");
+                if (data.Tracked && data.Tracked === true) {
+                    console.log("Face Analytics Data Tracked, dialing up S3 to save results");
+                } else {
+                    console.log("No Face Analytics Data Tracked");
+                }
             }
-        }
-    });
+        });
     }
 
     if (frameno === MAX_FRAMES) {
