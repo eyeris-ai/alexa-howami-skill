@@ -7,6 +7,9 @@ var querystring = require('querystring');
 
 var v4l2camera = require("v4l2camera");
 var pngjs = require("pngjs");
+var AWS = require('aws-sdk');
+var now = require("performance-now");
+
 // var FormData = require('form-data');
 var request = require('request');
 
@@ -111,7 +114,9 @@ var pngLoaderScript3 = function () {
 };
 
 var toPng = function () {
-	// console.log("toPng:", new Date());
+    //
+    // NOTE, this snippet is right out of the v4l2camera capture app
+    //
     var rgb = cam.toRGB();
     var png = new pngjs.PNG({
         width: cam.width, height: cam.height, filterType: -1,
@@ -134,7 +139,7 @@ var toPng = function () {
     // connection, or eventually DDOS the web server
     //
     // For right now, we don't need a realtime stream, getting 3-5 fps is fine
-    //
+    //-
     /*
     if (frameno > 5) {
     analyzeFaceFrame(frameno-5, lastFrameResult, function(data){
