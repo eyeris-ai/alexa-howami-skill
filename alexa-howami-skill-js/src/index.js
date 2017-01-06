@@ -47,11 +47,15 @@
 //
 var AWS = require('aws-sdk');
 // var now = require("performance-now");
-var config= require('./config.json');
+var config = require('./config.json');
+var pkg = require('./package.json');
 
 /**
  * App ID for the skill
  */
+// XXX As long as this APP_ID is undefined for testing/development, AWS won't bug you about
+// having a real APP_ID
+// Update this to read from config.APP_ID
 var APP_ID = undefined; //replace with "amzn1.echo-sdk-ams.app.[your-unique-value-here]";
 var EMOVU_API_KEY = config.emovu_api_key;  // Add an EmoVu API Key
 var runid = Date();
@@ -102,42 +106,106 @@ HowAmISkill.prototype.eventHandlers.onSessionEnded = function (sessionEndedReque
 HowAmISkill.prototype.intentHandlers = {
     // register custom intent handlers
     "HowAmISkillIntent": function (intent, session, response) {
+        //
+        // Setup your AWS SDK
+        //
+        var officialClientCfg = {
+          accessKeyId: config.accessKeyID, 
+          secretAccessKey: config.secretAccessKey,
+          region: config.region // 'us-east-1' US East (N. Virginia), for use w/ Alexa Echo stuff
+                                // http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+                                // http://docs.aws.amazon.com/general/latest/gr/rande.html#lambda_region
+                                // Be sure you send S3 to the same region as your Lambda Functions
+        };
+        AWS.config.update(officialClientCfg);
+        var s3 = new AWS.S3();
 
         //
         // Fetch the EmoVu result from S3
         //
+        var params = {
+            "Bucket": config.S3bucketID,
+            "Key": config.S3key
+        }
+        s3.getObject(params, function(err, data) {
+            //
+            // Parse the EmoVu result
+            //
 
-        //
-        // Parse the EmoVu result
-        //
+            //
+            // Based on the result, determine how to respond
+            //
+            // Either say the phrase matching the emotion
+            //
+            // Or tell the user you can't tell how they are doing (if no fresh data)
+            //
+            // Or if no results, say they need to set up their How Am I Capture App
 
-        //
-        // Based on the result, determine how to respond
-        //
-        // Either say the phrase matching the emotion
-        //
-        // Or tell the user you can't tell how they are doing (if no fresh data)
-        //
-        // Or if no results, say they need to set up their How Am I Capture App
+            //
+            // Say
+            //
+            var saytext = "You are doing great";
 
-        //
-        // Say
-        //
-        var saytext = "You are doing great";
+            //
+            // Card Heading
+            //
+            var cardheading = "How Am I?  I'll Tell you";
 
-        //
-        // Card Heading
-        //
-        var cardheading = "How Am I?  I'll Tell you";
+            //
+            // Card Text
+            // Potentially we might want to say a lot more in a card
+            // Otherwise, just copy the say text.
+            var additionaltext = ".  I see you.  Don't ever change";
 
-        //
-        // Card Text
-        // Potentially we might want to say a lot more in a card
-        // Otherwise, just copy the say text.
-        var additionaltext = ".  I see you.  Don't ever change";
-        var cardtext = saytext + additionaltext;
-        response.tellWithCard(saytext, cardheading, cardtext);
-        // response.tellWithCard("Hello World!", "Hello World", "Hello World!");
+            if (err) {
+                console.log(err, err.stack); // an error occurred
+                //
+                // Form an error response
+                //
+                saytext = "Hmmmm I couldn't find your data or you need to configure your bucket";
+                cardheading = "How Am I?  You have configuration Problems."
+                additionaltext = ".  My suggestion is to check the configuration of your bucket or your EmoVu api keys";
+            } else {
+                console.log(data);
+                if (data && data.Body.length > 0) {
+                    try {
+                        var jsonData = JSON.parse(data.Body.toString('utf-8'));
+                        //
+                        // Form an Valid response
+                        //
+                        /*
+                        saytext = "Hmmmm I had a problem loading results.  You have bad data.  Bad.";
+                        cardheading = "How Am I?  Your data is bad."
+                        additionaltext = ".  My suggestion is to check in your S3 bucket why your results are empty";
+                        */
+                    } catch(err) {
+                        //
+                        // Form an error response
+                        //
+                        saytext = "Hmmmm I had a problem loading results.  You have bad data.  Bad.";
+                        cardheading = "How Am I?  Your data is bad."
+                        additionaltext = ".  My suggestion is to check in your S3 bucket why your results are empty";
+                    }
+                } else {
+                    //
+                    // Strange, no data?  Maybe an empty results file?
+                    // Something went wrong
+                    //
+                    // Form an error response
+                    //
+                    saytext = "Hmmmm I had a problem loading results.  Try again later.";
+                    cardheading = "How Am I?  I couldn't find any data."
+                    additionaltext = ".  My suggestion is to check in your S3 bucket why your results are empty";
+                }
+            }
+
+            //
+            // Generate a response to the User
+            //
+            var cardtext = saytext + additionaltext;
+            response.tellWithCard(saytext, cardheading, cardtext);
+        });
+
     },
     "AMAZON.HelpIntent": function (intent, session, response) {
         response.ask("You can say How Am I", "You can say How Am I");
@@ -147,7 +215,7 @@ HowAmISkill.prototype.intentHandlers = {
 // Create the handler that responds to the Alexa Request.
 exports.handler = function (event, context) {
     // Create an instance of the HowAmISkill skill.
-    console.log(runid, event);
+    console.log(runid, pkg.version, event);
     var howAmISkill = new HowAmISkill();
     howAmISkill.execute(event, context);
 };
