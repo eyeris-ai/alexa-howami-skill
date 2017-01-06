@@ -46,13 +46,13 @@
 // Include only the packages you need
 //
 var AWS = require('aws-sdk');
-var now = require("performance-now");
+// var now = require("performance-now");
 var config= require('./config.json');
 
 /**
  * App ID for the skill
  */
-var APP_ID = config.APP_ID; //replace with "amzn1.echo-sdk-ams.app.[your-unique-value-here]";
+var APP_ID = undefined; //replace with "amzn1.echo-sdk-ams.app.[your-unique-value-here]";
 var EMOVU_API_KEY = config.emovu_api_key;  // Add an EmoVu API Key
 var runid = Date();
 // You might need to invoke another lambda directly
@@ -137,6 +137,7 @@ HowAmISkill.prototype.intentHandlers = {
         var additionaltext = ".  I see you.  Don't ever change";
         var cardtext = saytext + additionaltext;
         response.tellWithCard(saytext, cardheading, cardtext);
+        // response.tellWithCard("Hello World!", "Hello World", "Hello World!");
     },
     "AMAZON.HelpIntent": function (intent, session, response) {
         response.ask("You can say How Am I", "You can say How Am I");
