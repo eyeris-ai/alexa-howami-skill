@@ -1,0 +1,19 @@
+{
+  "name": "how-am-i-skill-lambda",
+  "version": "1.0.0",
+  "description": "Ask Alexa How Am I.  Eyeris EmoVu WebAPI can see you and Alexa will tell you how you are doing",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "truedat101",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "async": "^2.1.2",
+    "aws-sdk": "^2.6.12",
+    "performance-now": "^0.2.0"
+  },
+  "devDependencies": {
+    "lambda-local": "^1.1.0"
+  }
+}

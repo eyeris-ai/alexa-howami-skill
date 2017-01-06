@@ -283,8 +283,14 @@ var analyzeFaceFrame = function(pngframeno, lastFrameResult, callback) {
 };
 
 initAWS();
-var cam = new v4l2camera.Camera("/dev/video0");  // XXX Hardcoded values
-cam.configSet({width: 176, height: 120}); // XXX Harcoded values
+var cam = new v4l2camera.Camera(config.cameradeviceid);  // XXX Hardcoded values
+//
+// NOTE: Depending on your camera, you may need to tune the width and height
+// to get better results
+//
+// Extra Credit: Tune the capture resolution to get a better PNG image
+//
+cam.configSet({width: config.camerawidth, height: config.cameraheight});
 cam.start();
 cam.capture(function loop() {
 	toPng();

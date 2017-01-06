@@ -41,11 +41,24 @@
  *  Alexa: "You are doing great, happy in fact"
  */
 
+
+//
+// Include only the packages you need
+//
+var AWS = require('aws-sdk');
+var now = require("performance-now");
+var config= require('./config.json');
+
 /**
  * App ID for the skill
  */
-var APP_ID = undefined; //replace with "amzn1.echo-sdk-ams.app.[your-unique-value-here]";
-var EMOVU_API_KEY = undefined;  // Add an EmoVu API Key
+var APP_ID = config.APP_ID; //replace with "amzn1.echo-sdk-ams.app.[your-unique-value-here]";
+var EMOVU_API_KEY = config.emovu_api_key;  // Add an EmoVu API Key
+var runid = Date();
+// You might need to invoke another lambda directly
+// Be mindful of your resource limits
+// var lambda = new AWS.Lambda();
+
 
 /**
  * The AlexaSkill prototype and helper functions
@@ -61,6 +74,7 @@ var AlexaSkill = require('./AlexaSkill');
 var HowAmISkill = function () {
     AlexaSkill.call(this, APP_ID);
 };
+
 
 // Extend AlexaSkill
 HowAmISkill.prototype = Object.create(AlexaSkill.prototype);
@@ -88,17 +102,51 @@ HowAmISkill.prototype.eventHandlers.onSessionEnded = function (sessionEndedReque
 HowAmISkill.prototype.intentHandlers = {
     // register custom intent handlers
     "HowAmISkillIntent": function (intent, session, response) {
-        response.tellWithCard("Hello World!", "Hello World", "Hello World!");
+
+        //
+        // Fetch the EmoVu result from S3
+        //
+
+        //
+        // Parse the EmoVu result
+        //
+
+        //
+        // Based on the result, determine how to respond
+        //
+        // Either say the phrase matching the emotion
+        //
+        // Or tell the user you can't tell how they are doing (if no fresh data)
+        //
+        // Or if no results, say they need to set up their How Am I Capture App
+
+        //
+        // Say
+        //
+        var saytext = "You are doing great";
+
+        //
+        // Card Heading
+        //
+        var cardheading = "How Am I?  I'll Tell you";
+
+        //
+        // Card Text
+        // Potentially we might want to say a lot more in a card
+        // Otherwise, just copy the say text.
+        var additionaltext = ".  I see you.  Don't ever change";
+        var cardtext = saytext + additionaltext;
+        response.tellWithCard(saytext, cardheading, cardtext);
     },
     "AMAZON.HelpIntent": function (intent, session, response) {
-        response.ask("You can say hello to me!", "You can say hello to me!");
+        response.ask("You can say How Am I", "You can say How Am I");
     }
 };
 
 // Create the handler that responds to the Alexa Request.
 exports.handler = function (event, context) {
     // Create an instance of the HowAmISkill skill.
-    var HowAmISkill = new HowAmISkill();
-    HowAmISkill.execute(event, context);
+    console.log(runid, event);
+    var howAmISkill = new HowAmISkill();
+    howAmISkill.execute(event, context);
 };
-

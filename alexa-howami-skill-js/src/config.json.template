@@ -1,0 +1,11 @@
+{
+	"name": "How Am I Skill Lambda Config",
+	"version": "1.0",
+	"emovu_api_key": "YOUR API KEY FOR EMOVU",
+	"accessKeyID": "YOUR AWS ACCESS KEY ID",
+	"secretAccessKey": "YOUR AWS SECRET ACCESS KEY",
+	"region": "us-east-1",
+	"S3bucketID": "howami",
+	"S3key": "emovuresult.json",
+	"APP_ID": "YOUR amzn1.echo-sdk-ams.app.[your-unique-value-here]"
+}

@@ -7,6 +7,9 @@ This focuses on communication with the Eyeris EmoVu Web API, providing a glimpse
 ## Setup
 To run this example skill you need to do two things. The first is to deploy the example code in lambda, and the second is to configure the Alexa skill to use Lambda.  The third thing to do is run your How Am I Capture App.
 
+- Install lambda-local to test your lambda function: https://www.npmjs.com/package/lambda-local
+- Configure your AWS SDK
+
 TODO: Insert Diagram
 
 ### AWS Lambda Setup

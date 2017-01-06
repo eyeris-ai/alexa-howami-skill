@@ -6,5 +6,8 @@
 	"secretAccessKey": "INSERT YOUR AWS SDK SECRET ACCESS KEY",
 	"region": "us-east-1",
 	"S3bucketID": "CONFIGURE A BUCKET CALLED howami",
-	"S3key": "emovuresult.json"
+	"S3key": "emovuresult.json",
+	"camerawidth": 176,
+	"cameraheight": 120,
+	"cameradeviceid": "/dev/video0"
 }
