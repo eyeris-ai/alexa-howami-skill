@@ -18,12 +18,12 @@ The Alexa Skill project must be deployed t
 - A Linux host system with v4l (ARMv7, ARMv8, or IA64)
 - An AWS account
 
-# Setup
+# Setup & "Build"
 
 To setup and deploy your Alexa How Am I Skill, take a look in the alexa-howami-skil-js readme.
 
 To capture data, take a look in the How Am I Capture App.
 
-# Build
-
 # Use
+
+Once everything is deployed, you can just ask Alexa, "How Am I?"
