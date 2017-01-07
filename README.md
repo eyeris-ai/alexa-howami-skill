@@ -27,3 +27,5 @@ To capture data, take a look in the How Am I Capture App.
 # Use
 
 Once everything is deployed, you can just ask Alexa, "How Am I?"
+
+Some tips on using the EmoVu Web API using curl: https://gist.github.com/truedat101/a5796c6a2ad834cc23d6fa762513c489
