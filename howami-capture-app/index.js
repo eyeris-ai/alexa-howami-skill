@@ -34,8 +34,7 @@ var server = http.createServer(function (req, res) {
             "<html><head><title>EmoVu How Am I Capture</title><meta charset='utf-8'/>",
             "<script>(", pngLoaderScript.toString(), ")()</script>",
             "</head><body>",
-            "<img id='cam' width='352' height='288' />",
-            "<EM>TODO: Fix web viewer, truncation</EM>",
+            "<img id='cam' width='" + config.camerawidth + "' height='" + config.cameraheight + "' />",
             "</body></html>",
         ].join(""));
         return;
@@ -46,7 +45,7 @@ var server = http.createServer(function (req, res) {
             "cache-control": "no-cache",
         });
         var png = toPng();
-        
+
         // XXX Add in some code to compute FPS
         console.log("Viewing Frame #" + frameno);
 
@@ -85,7 +84,7 @@ var pngLoaderScript = function () {
 var pngLoaderScript2 = function() {
     setInterval(function() {
 	   	window.addEventListener("load", function (ev) {
-		    
+
 		    	console.log("Reloading");
 		    	var img = new Image();
 		    	var cam = document.getElementById("cam");
@@ -129,7 +128,7 @@ var toPng = function () {
         png.data[i * 4 + 2] = rgb[i * 3 + 2];
         png.data[i * 4 + 3] = 255;
     }
-    
+
     png.pack().pipe(fs.createWriteStream(PNGOUT + "-" + frameno + ".png"));
     // Call EmoVu API on every frame
     console.log("Writing " + PNGOUT + "-" + frameno + ".png");
@@ -160,8 +159,8 @@ var toPng = function () {
     });
     */
     // if (frameno === 5 || frameno === 10 || frameno === 15 || frameno === 20 || frameno === 25 || frameno === 30) {
-    // if (frameno === 10 || frameno === 20 || frameno === 30) {
-    if (frameno === 6 || frameno === 12 || frameno === 18 || frameno === 24 || frameno === 30) {
+    if (frameno === 10 || frameno === 20 || frameno === 30) {
+    // if (frameno === 6 || frameno === 12 || frameno === 18 || frameno === 24 || frameno === 30) {
         analyzeFaceFrame(frameno-1, lastFrameResult, function(data){
             console.log("analyzeFaceFrame done");
             if (data) {
@@ -186,7 +185,7 @@ var toPng = function () {
 
 var initAWS = function() {
     var officialClientCfg = {
-      accessKeyId: config.accessKeyID, 
+      accessKeyId: config.accessKeyID,
       secretAccessKey: config.secretAccessKey,
       region: config.region // 'us-east-1' US East (N. Virginia)
                             // http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
@@ -207,7 +206,7 @@ var sendEmoVuResultsToS3 = function(jsonresults) {
         if (err) {
           console.error("Error, " + err);
         }
-        
+
         currenttime = now();
         console.log("-----------------------------------------------------------");
         console.log("Completed S3 upload in " + (currenttime-starttime) + "ms");
