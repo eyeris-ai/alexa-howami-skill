@@ -176,146 +176,163 @@ HowAmISkill.prototype.intentHandlers = {
                 additionaltext = ".  My suggestion is to check the configuration of your bucket or your EmoVu api keys";
             } else {
                 console.log(data);
-                if (data && data.Body.length > 0) {
-                    try {
-                        var jsonData = JSON.parse(data.Body.toString('utf-8'));
-                        //
-                        // Form an Valid response
-                        //
-                        // Format:
-                        //  - Tracked - should be true
-                        //
-                        // Some additional useful stuff
-                        // See more details about results here: http://emovu.com/docs/html/web_api.htm
-                        //
-                        /*
-                        "FaceAnalysisResults": [{
-                            "AgeGroupResult": {
-                                "AgeGroup": "Adult",
-                                "Computed": true,
-                                "Confidence": 0.984
-                            },
-                            "EmotionResult": {
-                                "Anger": 0.002,
-                                "Computed": true,
-                                "Disgust": 0.01,
-                                "Fear": 0.0,
-                                "Joy": 0.0,
-                                "Neutral": 0.986,
-                                "Sadness": 0.002,
-                                "Surprise": 0.0
-                            },
-                            "GenderResult": {
-                                "Computed": true,
-                                "Confidence": 1.0,
-                                "Gender": "Male"
-                            }
-                        }]
-                        */
+                if (data && data.Body.length > 0 ) {
+                    //
+                    // Check the data age
+                    //
+                    var dateage = new Date(data.LastModified);
 
-                        //
-                        // Homework assignment, build a more sophisticated and varied set of responses
-                        // Maybe create a magic 8 ball style set of answers
-                        // Or maybe do some more sophisticated analysis.  Were eyes closed?
-                        // Can you address the person by Gender?
-                        // Can you guess at the age range?
-                        // How about give us some sentiment
-                        //
-                        if (jsonData.Tracked) {
+                    //
+                    // Note: We only deal in fresh data of one minute or newer
+                    //
+                    if (Date.now()-dateage.getTime() < 60000 /* ms */) {
+                        try {
+                            var jsonData = JSON.parse(data.Body.toString('utf-8'));
                             //
-                            // Grab the emotion values
+                            // Form an Valid response
                             //
-                            // XXX We should be a bit more careful and verify the properties exist
-                            var emotionResult = jsonData.FaceAnalysisResults[0].EmotionResult;
+                            // Format:
+                            //  - Tracked - should be true
+                            //
+                            // Some additional useful stuff
+                            // See more details about results here: http://emovu.com/docs/html/web_api.htm
+                            //
+                            /*
+                            "FaceAnalysisResults": [{
+                                "AgeGroupResult": {
+                                    "AgeGroup": "Adult",
+                                    "Computed": true,
+                                    "Confidence": 0.984
+                                },
+                                "EmotionResult": {
+                                    "Anger": 0.002,
+                                    "Computed": true,
+                                    "Disgust": 0.01,
+                                    "Fear": 0.0,
+                                    "Joy": 0.0,
+                                    "Neutral": 0.986,
+                                    "Sadness": 0.002,
+                                    "Surprise": 0.0
+                                },
+                                "GenderResult": {
+                                    "Computed": true,
+                                    "Confidence": 1.0,
+                                    "Gender": "Male"
+                                }
+                            }]
+                            */
 
-                            var topscorevalue = 0;
-                            var rankedEmotionScores = [];
+                            //
+                            // Homework assignment, build a more sophisticated and varied set of responses
+                            // Maybe create a magic 8 ball style set of answers
+                            // Or maybe do some more sophisticated analysis.  Were eyes closed?
+                            // Can you address the person by Gender?
+                            // Can you guess at the age range?
+                            // How about give us some sentiment
+                            //
+                            if (jsonData.Tracked) {
+                                //
+                                // Grab the emotion values
+                                //
+                                // XXX We should be a bit more careful and verify the properties exist
+                                var emotionResult = jsonData.FaceAnalysisResults[0].EmotionResult;
 
-                            for (var i = 0; i < EMOTION_SET.length; i++) {
-                                // console.log("Checking emotion ", EMOTION_SET[i]);
-                                if (rankedEmotionScores.length > 0) {
-                                    for (var j = 0; j < rankedEmotionScores.length; j++) {
-                                        // console.log("Checking value ", emotionResult[EMOTION_SET[i]], " against ranked score: ", rankedEmotionScores[j]);
-                                        if (emotionResult[EMOTION_SET[i]] > rankedEmotionScores[j][1]) {
-                                            //
-                                            // Push to front and set the topscorevalue
-                                            //
-                                            rankedEmotionScores.splice(j,0, [EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
-                                            // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
-                                            if (emotionResult[EMOTION_SET[i]] > topscorevalue) {
+                                var topscorevalue = 0;
+                                var rankedEmotionScores = [];
+
+                                for (var i = 0; i < EMOTION_SET.length; i++) {
+                                    // console.log("Checking emotion ", EMOTION_SET[i]);
+                                    if (rankedEmotionScores.length > 0) {
+                                        for (var j = 0; j < rankedEmotionScores.length; j++) {
+                                            // console.log("Checking value ", emotionResult[EMOTION_SET[i]], " against ranked score: ", rankedEmotionScores[j]);
+                                            if (emotionResult[EMOTION_SET[i]] > rankedEmotionScores[j][1]) {
+                                                //
+                                                // Push to front and set the topscorevalue
+                                                //
+                                                rankedEmotionScores.splice(j,0, [EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
                                                 // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
-                                                topscorevalue = emotionResult[EMOTION_SET[i]];
-                                            }
-                                            break;
-                                        } else {
-                                            if (j == (rankedEmotionScores.length-1)) {
-                                                rankedEmotionScores.push([EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
                                                 if (emotionResult[EMOTION_SET[i]] > topscorevalue) {
                                                     // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
                                                     topscorevalue = emotionResult[EMOTION_SET[i]];
                                                 }
                                                 break;
+                                            } else {
+                                                if (j == (rankedEmotionScores.length-1)) {
+                                                    rankedEmotionScores.push([EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
+                                                    if (emotionResult[EMOTION_SET[i]] > topscorevalue) {
+                                                        // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
+                                                        topscorevalue = emotionResult[EMOTION_SET[i]];
+                                                    }
+                                                    break;
+                                                }
                                             }
                                         }
-                                    }
-                                } else {
-                                    rankedEmotionScores.push([EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
-                                    // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
-                                    if (emotionResult[EMOTION_SET[i]] > topscorevalue) {
+                                    } else {
+                                        rankedEmotionScores.push([EMOTION_SET[i],emotionResult[EMOTION_SET[i]]]);
                                         // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
-                                        topscorevalue = emotionResult[EMOTION_SET[i]];
+                                        if (emotionResult[EMOTION_SET[i]] > topscorevalue) {
+                                            // console.log("Setting topscorevalue to ", emotionResult[EMOTION_SET[i]]);
+                                            topscorevalue = emotionResult[EMOTION_SET[i]];
+                                        }
                                     }
                                 }
-                            }
 
-                        // console.log(rankedEmotionScores);
-                        // console.log("topscorevalue = ", topscorevalue);
-                            /*
-                            var scores = "";
-                            for (var k = 0; k < rankedEmotionScores.length; k++) {
-                                scores += rankedEmotionScores[k][1] + " ";
-                            }
-                            */
-                            if (rankedEmotionScores[0][0] === "Anger") {
-                                saytext = "Woah, you mad bro?  Don't be so Angry."; // + jsonData.Timestamp + ", top score is ", topscorevalue;
-                            } else if (rankedEmotionScores[0][0] === "Disgust") {
-                                saytext = "Hmmm, do you smell something bad?  Check your shoes.   Ew, disgusting.";
-                            }  else if (rankedEmotionScores[0][0] === "Fear") {
-                                saytext = "What are you afraid of?  You look scared.";
-                            } else if (rankedEmotionScores[0][0] === "Joy") {
-                                saytext = "Now that's a smile worth a million bucks.  Your joy is contagious.";
-                            }  else if (rankedEmotionScores[0][0] === "Neutral") {
-                                saytext = "Do you always hide your feelings?  You are expressionless.";
-                            }  else if (rankedEmotionScores[0][0] === "Sadness") {
-                                saytext = "Are you feeling ok?  You seem sad.  Too much CES?";
-                            }  else if (rankedEmotionScores[0][0] === "Surprise") {
-                                saytext = "You look shocked.  Did we just surprise you with an awesome demo?";
+                            // console.log(rankedEmotionScores);
+                            // console.log("topscorevalue = ", topscorevalue);
+                                /*
+                                var scores = "";
+                                for (var k = 0; k < rankedEmotionScores.length; k++) {
+                                    scores += rankedEmotionScores[k][1] + " ";
+                                }
+                                */
+                                if (rankedEmotionScores[0][0] === "Anger") {
+                                    saytext = "Woah, you mad bro?  Don't be so Angry."; // + jsonData.Timestamp + ", top score is ", topscorevalue;
+                                } else if (rankedEmotionScores[0][0] === "Disgust") {
+                                    saytext = "Hmmm, do you smell something bad?  Check your shoes.   Ew, disgusting.";
+                                }  else if (rankedEmotionScores[0][0] === "Fear") {
+                                    saytext = "What are you afraid of?  You look scared.";
+                                } else if (rankedEmotionScores[0][0] === "Joy") {
+                                    saytext = "Now that's a smile worth a million bucks.  Your joy is contagious.";
+                                }  else if (rankedEmotionScores[0][0] === "Neutral") {
+                                    saytext = "Do you always hide your feelings?  You are expressionless.";
+                                }  else if (rankedEmotionScores[0][0] === "Sadness") {
+                                    saytext = "Are you feeling ok?  You seem sad.  Too much CES?";
+                                }  else if (rankedEmotionScores[0][0] === "Surprise") {
+                                    saytext = "You look shocked.  Did we just surprise you with an awesome demo?";
+                                } else {
+                                    saytext = "Hmmmm, you are experiencing an emotion I cannot describe.";
+                                }
+                                // console.log("About to say: ", saytext);
                             } else {
-                                saytext = "Hmmmm, you are experiencing an emotion I cannot describe.";
+                                //
+                                // Form an Error
+                                //
+                                saytext = "That's strange, but we weren't able to detect any faces.  Are you there?  Try again.";
+                                cardheading = "How Am I?  I can't see you."
+                                additionaltext = ".  Some things to try: Make sure your camera is on, make sure you are sitting in front of your camera, hold still!";
                             }
-                            // console.log("About to say: ", saytext);
-                        } else {
+
+                            
+
                             //
-                            // Form an Error
+                            /*
+                            saytext = "Hmmmm I had a problem loading results.  You have bad data.  Bad.";
+                            cardheading = "How Am I?  Your data is bad."
+                            additionaltext = ".  My suggestion is to check in your S3 bucket why your results are empty";
+                            */
+                        } catch(err) {
                             //
-                            saytext = "That's strange, but we weren't able to detect any faces.  Are you there?  Try again.";
-                            cardheading = "How Am I?  I can't see you."
-                            additionaltext = ".  Some things to try: Make sure your camera is on, make sure you are sitting in front of your camera, hold still!";
+                            // Form an error response
+                            //
+                            saytext = "Hmmmm I had a problem loading results.  You have bad data.  Bad.";
+                            cardheading = "How Am I?  Your data is bad."
+                            additionaltext = ".  My suggestion is to check in your S3 bucket why your results are empty";
                         }
-
-                        
-
+                    } else {
                         //
-                        /*
-                        saytext = "Hmmmm I had a problem loading results.  You have bad data.  Bad.";
-                        cardheading = "How Am I?  Your data is bad."
-                        additionaltext = ".  My suggestion is to check in your S3 bucket why your results are empty";
-                        */
-                    } catch(err) {
+                        // Data Is Stale!
                         //
-                        // Form an error response
-                        //
-                        saytext = "Hmmmm I had a problem loading results.  You have bad data.  Bad.";
+                        saytext = "Hmmmm , I haven't seen your face in awhile.";
                         cardheading = "How Am I?  Your data is bad."
                         additionaltext = ".  My suggestion is to check in your S3 bucket why your results are empty";
                     }
@@ -326,9 +343,9 @@ HowAmISkill.prototype.intentHandlers = {
                     //
                     // Form an error response
                     //
-                    saytext = "Hmmmm I had a problem loading results.  Try again later.";
-                    cardheading = "How Am I?  I couldn't find any data."
-                    additionaltext = ".  My suggestion is to check in your S3 bucket why your results are empty";
+                    saytext = "Hmmmm I had a problem loading results.  Please make sure you have sent me some data.";
+                    cardheading = "How Am I?  Data Expired"
+                    additionaltext = ".  My suggestion is to send some fresh data.  Make sure your capture application is running.";
                 }
             }
 
