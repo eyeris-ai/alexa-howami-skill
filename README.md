@@ -1,6 +1,6 @@
 # Overview
 
-An example Alexa Skill using Eyeris EmoVu face analytics.  Ask it "Alexa How Am I?" and Alexa will return an answer describing your emotion.  This skill assumes you have an EmoVu HowMe App running on your host system
+An example Alexa Skill using Eyeris EmoVu http://emovu.com/e/ face analytics.  Ask it "Alexa How Am I?" and Alexa will return an answer describing your emotion.  This skill assumes you have an EmoVu HowMe App running on your host system
 
 # Concept
 
