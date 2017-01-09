@@ -9,7 +9,6 @@ Below is a diagram of the demo concept.
 
 ![](https://github.com/truedat101/alexa-howami-skill/blob/master/assets/HowAmIAlexaSkillDiagram.png?raw=true)
 
-The Alexa Skill project must be deployed t
 # Dependencies
 
 - An ol' version of Node.js v0.10.x is preferred, as the v4l code won't compile with newer stuff
